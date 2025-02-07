@@ -1,26 +1,31 @@
 from flask import Flask, request, jsonify
 import openai
 import stripe
+import os  # Import os to dynamically set port
 
 app = Flask(__name__)
 
-# Default homepage route
-@app.route('/')
+# Default homepage route (to confirm the app is live)
+@app.route('/', methods=['GET'])
 def home():
-    return "AI Sales Bot is running!"
+    return jsonify({"message": "AI Sales Bot is running!"})
 
-# Chat endpoint
+# Chatbot API endpoint
 @app.route('/chat', methods=['POST'])
 def chat():
-    data = request.json
-    user_message = data.get("message")
-    if not user_message:
-        return jsonify({"error": "No message provided"}), 400
-    
-    response = {"response": f"AI response to: {user_message}"}
-    return jsonify(response)
+    try:
+        data = request.get_json()
+        if not data or "message" not in data:
+            return jsonify({"error": "No message provided"}), 400
 
-# Stripe Payment Route
+        user_message = data["message"]
+        response = {"response": f"AI response to: {user_message}"}
+        return jsonify(response)
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# Stripe Payment API
 @app.route('/create-checkout-session', methods=['POST'])
 def create_checkout_session():
     try:
@@ -40,7 +45,9 @@ def create_checkout_session():
         )
         return jsonify({'id': session.id})
     except Exception as e:
-        return jsonify(error=str(e)), 400
+        return jsonify({"error": str(e)}), 400
 
+# Main entry point for Render (DO NOT manually set the port)
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=10000, debug=True)
+    port = int(os.environ.get("PORT", 10000))  # Automatically uses Render's assigned port
+    app.run(host="0.0.0.0", port=port, debug=True)
