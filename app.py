@@ -1,15 +1,14 @@
 from flask import Flask, request, jsonify
 import os
 
-# ✅ Define `app` first before using it
-app = Flask(__name__)
+app = Flask(__name__)  # ✅ Define Flask app correctly
 
 # ✅ Root Route - Confirms App is Running
 @app.route('/')
 def home():
     return jsonify({"message": "AI Sales Bot is running!"})
 
-# ✅ Chatbot API - Handles Sales Conversations
+# ✅ Chatbot API - Fixing the 404 Issue
 @app.route('/chat', methods=['POST'])
 def chat():
     try:
@@ -23,7 +22,7 @@ def chat():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# ✅ Auto-Port for Render Deployment
+# ✅ Ensure the App Runs on the Correct Port in Render
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 8080))  # Render auto-assigns the correct port
+    port = int(os.environ.get("PORT", 8080))  # Let Render auto-assign the port
     app.run(host="0.0.0.0", port=port, debug=True)
