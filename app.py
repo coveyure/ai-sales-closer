@@ -1,53 +1,24 @@
 from flask import Flask, request, jsonify
-import openai
-import stripe
-import os  # Import os to dynamically set port
+import os  # Import os to handle dynamic port assignment
 
 app = Flask(__name__)
 
-# Default homepage route (to confirm the app is live)
-@app.route('/', methods=['GET'])
+# ✅ Confirm the app is running
+@app.route('/')
 def home():
     return jsonify({"message": "AI Sales Bot is running!"})
 
-# Chatbot API endpoint
+# ✅ Chatbot API
 @app.route('/chat', methods=['POST'])
 def chat():
-    try:
-        data = request.get_json()
-        if not data or "message" not in data:
-            return jsonify({"error": "No message provided"}), 400
-
-        user_message = data["message"]
-        response = {"response": f"AI response to: {user_message}"}
-        return jsonify(response)
+    data = request.get_json()
+    if not data or "message" not in data:
+        return jsonify({"error": "No message provided"}), 400
     
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    user_message = data["message"]
+    return jsonify({"response": f"AI response to: {user_message}"})
 
-# Stripe Payment API
-@app.route('/create-checkout-session', methods=['POST'])
-def create_checkout_session():
-    try:
-        session = stripe.checkout.Session.create(
-            payment_method_types=['card'],
-            line_items=[{
-                'price_data': {
-                    'currency': 'usd',
-                    'product_data': {'name': 'AI Sales Closer Subscription'},
-                    'unit_amount': 4900,
-                },
-                'quantity': 1,
-            }],
-            mode='subscription',
-            success_url='https://yourdomain.com/success',
-            cancel_url='https://yourdomain.com/cancel',
-        )
-        return jsonify({'id': session.id})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 400
-
-# Main entry point for Render (DO NOT manually set the port)
+# ✅ Render Deployment (Uses auto-assigned port)
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 10000))  # Automatically uses Render's assigned port
+    port = int(os.environ.get("PORT", 10000))  # Default to 10000, but Render assigns its own port
     app.run(host="0.0.0.0", port=port, debug=True)
