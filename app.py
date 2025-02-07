@@ -4,12 +4,12 @@ import stripe
 
 app = Flask(__name__)
 
-# Default homepage route (to confirm the app is running)
+# Default homepage route
 @app.route('/')
 def home():
     return "AI Sales Bot is running!"
 
-# Chat endpoint for AI sales responses
+# Chat endpoint
 @app.route('/chat', methods=['POST'])
 def chat():
     data = request.json
@@ -20,10 +20,7 @@ def chat():
     response = {"response": f"AI response to: {user_message}"}
     return jsonify(response)
 
-# Stripe API Key (Replace with your actual API Key)
-STRIPE_SECRET_KEY = "your_stripe_secret_key"
-stripe.api_key = STRIPE_SECRET_KEY
-
+# Stripe Payment Route
 @app.route('/create-checkout-session', methods=['POST'])
 def create_checkout_session():
     try:
